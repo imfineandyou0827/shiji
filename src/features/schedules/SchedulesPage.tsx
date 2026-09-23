@@ -16,7 +16,7 @@ import {
   toISODate,
 } from '../../utils/date';
 import { ScheduleForm } from './ScheduleForm';
-import { schedulesToIcs, googleCalendarUrl } from '../../utils/ics';
+import { schedulesToIcs, calendarLink } from '../../utils/ics';
 import { downloadText } from '../../utils/exportPlan';
 import styles from './SchedulesPage.module.css';
 
@@ -182,10 +182,10 @@ export function SchedulesPage() {
                 <div className={styles.rowActions}>
                   <a
                     className={styles.calLink}
-                    href={googleCalendarUrl(s) ?? '#'}
+                    href={calendarLink(s)}
                     target="_blank"
                     rel="noreferrer noopener"
-                    title="添加到 Google 日历"
+                    title="添加到日历"
                   >
                     加到日历
                   </a>

@@ -112,6 +112,33 @@ export function googleCalendarUrl(schedule: Schedule, from = new Date()): string
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
+export function androidCalendarIntent(schedule: Schedule, from = new Date()): string | null {
+  const start = nextStart(schedule, from);
+  if (!start) return null;
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const rule = recurrenceRule(schedule)?.replace('RRULE:', '');
+  const parts = [
+    'action=android.intent.action.INSERT',
+    'type=vnd.android.cursor.item/event',
+    `S.title=${encodeURIComponent(schedule.title)}`,
+    `l.beginTime=${start.getTime()}`,
+    `l.endTime=${end.getTime()}`,
+    'b.allDay=false',
+  ];
+  if (schedule.notes) parts.push(`S.description=${encodeURIComponent(schedule.notes)}`);
+  if (rule) parts.push(`S.rrule=${encodeURIComponent(rule)}`);
+  const fallback = googleCalendarUrl(schedule, from);
+  if (fallback) parts.push(`S.browser_fallback_url=${encodeURIComponent(fallback)}`);
+  return `intent://#Intent;${parts.join(';')};end`;
+}
+
+export function calendarLink(schedule: Schedule, from = new Date()): string {
+  const isAndroid =
+    typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent);
+  if (isAndroid) return androidCalendarIntent(schedule, from) ?? '#';
+  return googleCalendarUrl(schedule, from) ?? '#';
+}
+
 export function schedulesToIcs(schedules: Schedule[], now = new Date()): string {
   const events = schedules
     .filter((s) => s.active)
