@@ -25,6 +25,7 @@ export default defineConfig({
         background_color: '#f5f4f1',
         display: 'standalone',
         orientation: 'any',
+        id: '.',
         start_url: '.',
         scope: '.',
         icons: [
@@ -39,6 +40,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: `${base}index.html`,
