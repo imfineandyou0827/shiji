@@ -91,6 +91,27 @@ function event(schedule: Schedule, now: Date): string | null {
   return lines.join('\r\n');
 }
 
+function gcalStamp(d: Date): string {
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(
+    d.getUTCHours(),
+  )}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+}
+
+export function googleCalendarUrl(schedule: Schedule, from = new Date()): string | null {
+  const start = nextStart(schedule, from);
+  if (!start) return null;
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: schedule.title,
+    dates: `${gcalStamp(start)}/${gcalStamp(end)}`,
+  });
+  if (schedule.notes) params.set('details', schedule.notes);
+  const rule = recurrenceRule(schedule);
+  if (rule) params.set('recur', rule);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 export function schedulesToIcs(schedules: Schedule[], now = new Date()): string {
   const events = schedules
     .filter((s) => s.active)
@@ -102,6 +123,7 @@ export function schedulesToIcs(schedules: Schedule[], now = new Date()): string 
     'VERSION:2.0',
     'PRODID:-//Shiji//Schedules//CN',
     'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
     `X-WR-CALNAME:拾集日程`,
     ...events,
     'END:VCALENDAR',

@@ -217,6 +217,20 @@
   flex-shrink: 0;
 }
 
+.calLink {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.calLink:hover {
+  background: var(--accent-soft);
+}
+
 @media (max-width: 640px) {
   .week {
     grid-template-columns: repeat(7, minmax(104px, 1fr));
