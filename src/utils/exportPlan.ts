@@ -1,6 +1,7 @@
 import type { AppList, AppObject, Difficulty, Plan, Schedule, Track } from '../types';
 import { describeRecurrence } from './date';
 import { trackSvg } from './trackSvg';
+import { renderTrackMap } from './staticMap';
 
 export interface ExportContext {
   objects: AppObject[];
@@ -135,7 +136,7 @@ export function planToMarkdown(plan: Plan, ctx: ExportContext): string {
   return lines.join('\n');
 }
 
-export function planToHtml(plan: Plan, ctx: ExportContext): string {
+export async function planToHtml(plan: Plan, ctx: ExportContext): Promise<string> {
   const { schedules, lists, tracks, objectById } = resolve(plan, ctx);
 
   const scheduleHtml =
@@ -206,30 +207,32 @@ export function planToHtml(plan: Plan, ctx: ExportContext): string {
     })
     .join('');
 
-  const trackHtml =
-    tracks.length === 0
-      ? '<p class="empty">暂无轨迹</p>'
-      : tracks
-          .map((t) => {
-            const stats: string[] = [];
-            if (t.distanceKm !== null) stats.push(`距离 ${t.distanceKm} km`);
-            if (t.elevationGainM !== null) stats.push(`爬升 ${t.elevationGainM} m`);
-            if (t.difficulty) stats.push(`难度 ${DIFFICULTY_LABEL[t.difficulty]}`);
-            if (t.durationMin !== null) stats.push(`时长 ${formatDuration(t.durationMin)}`);
-            const chips = stats.length
-              ? `<div class="chips">${stats.map((s) => `<span>${esc(s)}</span>`).join('')}</div>`
-              : '';
-            const svg = trackSvg(t.segments);
-            const map = svg ? `<div class="map">${svg}</div>` : '';
-            const link = t.link
-              ? `<p class="link"><a href="${esc(t.link)}">${esc(t.link)}</a></p>`
-              : '';
-            const notes = t.notes ? `<p class="note">${esc(t.notes)}</p>` : '';
-            return `<article class="card"><div class="card-head"><h3>🗺️ ${esc(
-              t.name,
-            )}</h3></div>${chips}${map}${link}${notes}</article>`;
-          })
-          .join('');
+  const trackParts: string[] = [];
+  for (const t of tracks) {
+    const stats: string[] = [];
+    if (t.distanceKm !== null) stats.push(`距离 ${t.distanceKm} km`);
+    if (t.elevationGainM !== null) stats.push(`爬升 ${t.elevationGainM} m`);
+    if (t.difficulty) stats.push(`难度 ${DIFFICULTY_LABEL[t.difficulty]}`);
+    if (t.durationMin !== null) stats.push(`时长 ${formatDuration(t.durationMin)}`);
+    const chips = stats.length
+      ? `<div class="chips">${stats.map((s) => `<span>${esc(s)}</span>`).join('')}</div>`
+      : '';
+    const mapImage = await renderTrackMap(t.segments, t.baseLayer);
+    const svg = mapImage ? '' : trackSvg(t.segments);
+    const map = mapImage
+      ? `<div class="map"><img src="${mapImage}" alt="轨迹地图" /></div>`
+      : svg
+        ? `<div class="map">${svg}</div>`
+        : '';
+    const link = t.link ? `<p class="link"><a href="${esc(t.link)}">${esc(t.link)}</a></p>` : '';
+    const notes = t.notes ? `<p class="note">${esc(t.notes)}</p>` : '';
+    trackParts.push(
+      `<article class="card"><div class="card-head"><h3>🗺️ ${esc(
+        t.name,
+      )}</h3></div>${chips}${map}${link}${notes}</article>`,
+    );
+  }
+  const trackHtml = tracks.length === 0 ? '<p class="empty">暂无轨迹</p>' : trackParts.join('');
 
   const dateRange = formatRange(plan.startDate, plan.endDate);
   const generated = new Date().toISOString().slice(0, 10);
@@ -302,6 +305,7 @@ export function planToHtml(plan: Plan, ctx: ExportContext): string {
     padding: 3px 11px; font-size: 12px; font-weight: 500; }
   .map { margin: 8px 0; }
   .map svg { display: block; border-radius: 10px; }
+  .map img { display: block; width: 100%; border-radius: 10px; border: 1px solid var(--line); }
   .link { margin: 8px 0 0; font-size: 13px; }
   a { color: var(--accent); word-break: break-all; }
   .empty { color: var(--muted); font-size: 13px; margin: 4px 0; }

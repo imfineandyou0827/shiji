@@ -34,13 +34,15 @@ function ExportDialogBody({ plan, onClose }: Omit<ExportDialogProps, 'open'>) {
     onClose();
   };
 
-  const exportHtml = () => {
-    downloadText(`${base}.html`, planToHtml(plan, ctx), 'text/html');
+  const exportHtml = async () => {
+    const html = await planToHtml(plan, ctx);
+    downloadText(`${base}.html`, html, 'text/html');
     onClose();
   };
 
-  const exportPdf = () => {
-    printHtml(planToHtml(plan, ctx));
+  const exportPdf = async () => {
+    const html = await planToHtml(plan, ctx);
+    printHtml(html);
     onClose();
   };
 
