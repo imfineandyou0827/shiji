@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { useStore } from '../../store/useStore';
 import { describeReminder } from '../../utils/reminders';
+import { showLocalNotification } from '../../utils/notify';
 import styles from './ReminderSettings.module.css';
 
 function currentPermission(): NotificationPermission | 'unsupported' {
@@ -18,8 +19,15 @@ export function ReminderSettings() {
     const result = await Notification.requestPermission();
     setPermission(result);
     if (result === 'granted') {
-      new Notification('拾集', { body: '提醒已开启，日程到点会通知你。', icon: '/pwa-192x192.png' });
+      await showLocalNotification('拾集', { body: '提醒已开启，日程到点会通知你。' });
     }
+  };
+
+  const test = async () => {
+    const ok = await showLocalNotification('拾集测试提醒', {
+      body: '如果你看到这条通知，说明提醒能用。',
+    });
+    if (!ok) window.alert('通知发送失败，可能未授予权限或系统限制。');
   };
 
   const active = schedules.filter((s) => s.active);
@@ -30,7 +38,12 @@ export function ReminderSettings() {
         <p className={styles.hint}>当前浏览器不支持通知。</p>
       )}
       {permission === 'granted' && (
-        <p className={styles.ok}>提醒已开启。日程到点时会弹出通知。</p>
+        <>
+          <p className={styles.ok}>提醒已开启。日程到点时会弹出通知。</p>
+          <Button size="sm" onClick={test}>
+            测试提醒
+          </Button>
+        </>
       )}
       {permission === 'denied' && (
         <p className={styles.warn}>

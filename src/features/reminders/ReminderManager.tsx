@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useStore } from '../../store/useStore';
 import { occurrenceOn } from '../../utils/reminders';
+import { showLocalNotification } from '../../utils/notify';
 
 const NOTIFIED_KEY = 'shiji:notified';
 const WINDOW_MS = 15 * 60_000;
@@ -28,7 +29,7 @@ function prune(notified: Notified, now: number): Notified {
 
 export function ReminderManager() {
   useEffect(() => {
-    const check = () => {
+    const check = async () => {
       if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
       const now = new Date();
       const nowMs = now.getTime();
@@ -43,16 +44,7 @@ export function ReminderManager() {
         const key = `${schedule.id}:${occurrence.toISOString()}`;
         if (notified[key]) continue;
         const body = schedule.time ? `今天 ${schedule.time} · ${schedule.title}` : schedule.title;
-        try {
-          new Notification('拾集提醒', {
-            body,
-            tag: key,
-            icon: '/pwa-192x192.png',
-            badge: '/pwa-192x192.png',
-          });
-        } catch {
-          // ignore notification errors
-        }
+        await showLocalNotification('拾集提醒', { body, tag: key });
         notified[key] = now.toISOString();
         changed = true;
       }
@@ -63,8 +55,8 @@ export function ReminderManager() {
       }
     };
 
-    check();
-    const id = window.setInterval(check, CHECK_MS);
+    void check();
+    const id = window.setInterval(() => void check(), CHECK_MS);
     return () => window.clearInterval(id);
   }, []);
 
