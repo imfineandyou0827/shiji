@@ -1,0 +1,11 @@
+.emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image {
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--surface-muted);
+}

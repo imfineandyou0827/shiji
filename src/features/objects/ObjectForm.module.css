@@ -1,0 +1,106 @@
+.preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--surface-muted);
+  border-radius: var(--radius);
+  margin-bottom: 18px;
+}
+
+.previewIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.previewText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.previewText strong {
+  font-size: 15px;
+}
+
+.previewText span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.emojiGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+.emojiBtn {
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.emojiBtn:hover {
+  background: var(--surface-muted);
+}
+
+.emojiActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tagPreview {
+  margin-top: 8px;
+}
+
+.newCategory {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.newCategory input {
+  flex: 1;
+}
+
+.memberHint {
+  font-size: 13px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+
+.fieldsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+  margin-bottom: 8px;
+  align-items: center;
+}

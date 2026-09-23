@@ -1,0 +1,142 @@
+.search {
+  margin-bottom: 8px;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  padding: 8px 2px;
+  line-height: 1.7;
+}
+
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: left;
+  font-size: 14px;
+}
+
+.checkRow:hover {
+  border-color: var(--accent);
+}
+
+.checkOn {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  color: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkOn .checkbox {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkName {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkCat {
+  font-size: 12px;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.back {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 2px 0 10px;
+}
+
+.back:hover {
+  color: var(--text);
+}
+
+.chosen {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 10px;
+}
+
+.selectTools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.selectTools button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 12px;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.selectTools button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.reuseList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 44vh;
+  overflow-y: auto;
+}
+
+.reuseRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: left;
+  font-size: 14px;
+}
+
+.reuseRow:hover {
+  border-color: var(--accent);
+}
+
+.reuseCount {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
