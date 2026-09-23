@@ -16,6 +16,8 @@ import {
   toISODate,
 } from '../../utils/date';
 import { ScheduleForm } from './ScheduleForm';
+import { schedulesToIcs } from '../../utils/ics';
+import { downloadText } from '../../utils/exportPlan';
 import styles from './SchedulesPage.module.css';
 
 export function SchedulesPage() {
@@ -57,9 +59,22 @@ export function SchedulesPage() {
         title="日程"
         subtitle="按周查看重复日程，比如番剧更新时间"
         actions={
-          <Button variant="primary" onClick={openNew}>
-            + 新建日程
-          </Button>
+          <>
+            <Button
+              onClick={() => {
+                if (schedules.filter((s) => s.active).length === 0) {
+                  window.alert('还没有启用的日程。');
+                  return;
+                }
+                downloadText('拾集日程.ics', schedulesToIcs(schedules), 'text/calendar');
+              }}
+            >
+              导出到日历
+            </Button>
+            <Button variant="primary" onClick={openNew}>
+              + 新建日程
+            </Button>
+          </>
         }
       />
 

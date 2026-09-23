@@ -51,7 +51,9 @@ export function ReminderSettings() {
       <p className={styles.hint}>
         共 {active.length} 个启用中的日程会提醒（无时间的按 09:00）。
         <br />
-        注意：网页版提醒需保持 App 打开或后台运行；关闭后不会推送。
+        网页提醒只在 App 打开或前台时有效，手机后台会被系统暂停。
+        <br />
+        <strong>想要关着 App 也能提醒</strong>：到「日程」页点「导出到日历」，把 .ics 导入手机系统日历，由系统日历负责提醒。
       </p>
 
       {active.length > 0 && (

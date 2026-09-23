@@ -3,7 +3,7 @@ import { useStore } from '../../store/useStore';
 import { occurrenceOn } from '../../utils/reminders';
 
 const NOTIFIED_KEY = 'shiji:notified';
-const WINDOW_MS = 90_000;
+const WINDOW_MS = 15 * 60_000;
 const CHECK_MS = 45_000;
 const PRUNE_DAYS = 8;
 
