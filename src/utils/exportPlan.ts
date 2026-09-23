@@ -140,15 +140,17 @@ export function planToHtml(plan: Plan, ctx: ExportContext): string {
 
   const scheduleHtml =
     schedules.length === 0
-      ? '<p class="muted">无</p>'
-      : `<ul>${schedules
+      ? '<p class="empty">暂无日程</p>'
+      : `<ul class="timeline">${schedules
           .map((s) => {
-            const parts = [describeRecurrence({ recurrence: s.recurrence })];
-            if (s.time) parts.push(s.time);
+            const recurrence = describeRecurrence({ recurrence: s.recurrence });
+            const time = s.time
+              ? `<span class="time">${esc(s.time)}</span>`
+              : '<span class="time muted">--:--</span>';
             const note = s.notes ? `<div class="note">${esc(s.notes)}</div>` : '';
-            return `<li><strong>${esc(s.title)}</strong><span class="meta">${esc(
-              parts.join(' · '),
-            )}</span>${note}</li>`;
+            return `<li>${time}<div class="tl-body"><div class="tl-title">${esc(
+              s.title,
+            )}</div><div class="sub">${esc(recurrence)}</div>${note}</div></li>`;
           })
           .join('')}</ul>`;
 
@@ -157,43 +159,56 @@ export function planToHtml(plan: Plan, ctx: ExportContext): string {
       const sections = list.sectionIds
         .map((id) => objectById.get(id))
         .filter((o): o is AppObject => o !== undefined);
+      const total = list.items.length;
+      const done = list.items.filter((i) => i.checked).length;
       const renderItem = (objectId: string, quantity: number, checked: boolean, note: string) => {
         const o = objectById.get(objectId);
         const name = o ? esc(o.name) : '（对象已删除）';
         const qty = quantity > 1 ? `<span class="qty">×${quantity}</span>` : '';
-        const noteText = note ? `<span class="note inline">${esc(note)}</span>` : '';
+        const noteText = note ? `<span class="note-inline">${esc(note)}</span>` : '';
         return `<li class="${checked ? 'done' : ''}"><span class="box">${
           checked ? '✓' : ''
         }</span><span class="item">${name}${qty}${noteText}</span></li>`;
       };
-      const blocks = sections.map((section) => {
+      const blocks: string[] = [];
+      for (const section of sections) {
         const items = list.items.filter((i) => i.sectionId === section.id);
-        const body =
+        blocks.push(
+          `<div class="subhead">${section.icon} ${esc(section.name)}<span class="cnt">${
+            items.length
+          }</span></div>`,
+        );
+        blocks.push(
           items.length === 0
-            ? '<p class="muted">无</p>'
+            ? '<p class="empty">无</p>'
             : `<ul class="items">${items
                 .map((i) => renderItem(i.objectId, i.quantity, i.checked, i.note))
-                .join('')}</ul>`;
-        return `<h3>${section.icon} ${esc(section.name)}</h3>${body}`;
-      });
+                .join('')}</ul>`,
+        );
+      }
       const unsectioned = list.items.filter(
         (i) => !i.sectionId || !list.sectionIds.includes(i.sectionId),
       );
       if (unsectioned.length > 0) {
+        blocks.push(`<div class="subhead">未分区<span class="cnt">${unsectioned.length}</span></div>`);
         blocks.push(
-          `<h3>未分区</h3><ul class="items">${unsectioned
+          `<ul class="items">${unsectioned
             .map((i) => renderItem(i.objectId, i.quantity, i.checked, i.note))
             .join('')}</ul>`,
         );
       }
-      const desc = list.description ? `<p class="muted">${esc(list.description)}</p>` : '';
-      return `<section class="list"><h2>清单：${esc(list.title)}</h2>${desc}${blocks.join('')}</section>`;
+      const desc = list.description ? `<p class="card-desc">${esc(list.description)}</p>` : '';
+      return `<article class="card"><div class="card-head"><h3>${
+        list.cover || '📋'
+      } ${esc(list.title)}</h3><span class="progress">${done}/${total} 已备</span></div>${desc}${blocks.join(
+        '',
+      )}</article>`;
     })
     .join('');
 
   const trackHtml =
     tracks.length === 0
-      ? '<p class="muted">无</p>'
+      ? '<p class="empty">暂无轨迹</p>'
       : tracks
           .map((t) => {
             const stats: string[] = [];
@@ -201,57 +216,129 @@ export function planToHtml(plan: Plan, ctx: ExportContext): string {
             if (t.elevationGainM !== null) stats.push(`爬升 ${t.elevationGainM} m`);
             if (t.difficulty) stats.push(`难度 ${DIFFICULTY_LABEL[t.difficulty]}`);
             if (t.durationMin !== null) stats.push(`时长 ${formatDuration(t.durationMin)}`);
+            const chips = stats.length
+              ? `<div class="chips">${stats.map((s) => `<span>${esc(s)}</span>`).join('')}</div>`
+              : '';
             const svg = trackSvg(t.segments);
-            const link = t.link ? `<p><a href="${esc(t.link)}">${esc(t.link)}</a></p>` : '';
+            const map = svg ? `<div class="map">${svg}</div>` : '';
+            const link = t.link
+              ? `<p class="link"><a href="${esc(t.link)}">${esc(t.link)}</a></p>`
+              : '';
             const notes = t.notes ? `<p class="note">${esc(t.notes)}</p>` : '';
-            return `<section class="track"><h3>${esc(t.name)}</h3>${
-              stats.length ? `<p class="stats">${esc(stats.join(' · '))}</p>` : ''
-            }${svg}${link}${notes}</section>`;
+            return `<article class="card"><div class="card-head"><h3>🗺️ ${esc(
+              t.name,
+            )}</h3></div>${chips}${map}${link}${notes}</article>`;
           })
           .join('');
+
+  const dateRange = formatRange(plan.startDate, plan.endDate);
+  const generated = new Date().toISOString().slice(0, 10);
 
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${esc(plan.icon)} ${esc(plan.title)}</title>
+<title>${esc(plan.title)}</title>
 <style>
-  :root { color-scheme: light; }
+  :root {
+    --bg:#f5f4f0; --card:#ffffff; --ink:#26241f; --muted:#7c7970;
+    --line:#e7e4dc; --accent:#3f7d5c; --accent-dark:#2f6249; --accent-soft:#e9f1ec;
+    color-scheme: light;
+  }
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    max-width: 820px; margin: 0 auto; padding: 32px 24px; color: #24231f; line-height: 1.65; }
-  h1 { font-size: 24px; margin: 0 0 8px; }
-  h2 { font-size: 17px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid #e4e2dc; }
-  h3 { font-size: 14px; margin: 18px 0 8px; color: #3f7d5c; }
-  .meta { color: #7a776e; margin-left: 8px; font-size: 13px; }
-  .stats { color: #3f7d5c; font-weight: 500; }
-  .muted, .note { color: #7a776e; font-size: 13px; }
-  ul { padding-left: 0; list-style: none; margin: 0; }
-  ul.items li { display: flex; gap: 8px; align-items: baseline; padding: 3px 0; }
-  .box { width: 16px; height: 16px; border: 1.5px solid #c9c7c0; border-radius: 4px; display: inline-flex;
-    align-items: center; justify-content: center; font-size: 11px; color: #3f7d5c; flex-shrink: 0; }
-  .done .box { background: #e6f0ea; border-color: #3f7d5c; }
-  .done .item { color: #7a776e; text-decoration: line-through; }
-  .qty { color: #7a776e; margin-left: 6px; }
-  .note.inline { margin-left: 8px; }
-  .list, .track { margin-bottom: 22px; }
-  .track svg { margin-top: 8px; }
-  .tag { display: inline-block; background: #f0efeb; border-radius: 999px; padding: 1px 10px; font-size: 12px; color: #7a776e; margin-right: 6px; }
-  a { color: #3f7d5c; word-break: break-all; }
-  @media print { body { padding: 0; } .track { break-inside: avoid; } }
+  html, body { margin: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.7;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 28px 22px 48px; }
+  .hero {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: #fff; border-radius: 18px; padding: 22px 24px;
+    box-shadow: 0 12px 30px rgba(47,98,73,.28);
+  }
+  .hero .icon { font-size: 46px; line-height: 1; }
+  .hero h1 { font-size: 25px; margin: 0 0 6px; letter-spacing: .2px; }
+  .hero .range { font-size: 13px; opacity: .92; }
+  .hero .tags { margin-top: 10px; }
+  .hero .tag { display: inline-block; background: rgba(255,255,255,.2); border-radius: 999px;
+    padding: 2px 11px; font-size: 12px; margin: 0 6px 6px 0; }
+  .desc { margin: 16px 4px 0; color: #3d3b35; }
+  .block { margin-top: 30px; }
+  .block > h2 { display: flex; align-items: center; gap: 9px; font-size: 16px; margin: 0 0 14px; color: var(--accent-dark); }
+  .block > h2::before { content: ''; width: 5px; height: 18px; border-radius: 3px; background: var(--accent); display: inline-block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; box-shadow: 0 2px 10px rgba(30,28,22,.05); margin-bottom: 14px; break-inside: avoid; }
+  .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .card-head h3 { font-size: 16px; margin: 0; }
+  .progress { flex-shrink: 0; font-size: 12px; color: var(--muted); background: var(--bg); border-radius: 999px; padding: 2px 10px; }
+  .card-desc { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+  .subhead { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+    color: var(--accent-dark); margin: 14px 0 6px; }
+  .subhead .cnt { margin-left: auto; color: var(--muted); font-weight: 400; font-size: 12px; }
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  ul.items li { display: flex; gap: 10px; align-items: baseline; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  ul.items li:last-child { border-bottom: none; }
+  .box { width: 17px; height: 17px; border: 1.6px solid #cdcabf; border-radius: 5px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; transform: translateY(1px); }
+  .done .box { background: var(--accent); border-color: var(--accent); }
+  .done .item { color: var(--muted); text-decoration: line-through; }
+  .qty { color: var(--muted); margin-left: 6px; font-size: 13px; }
+  .note-inline { color: var(--muted); margin-left: 8px; font-size: 12px; }
+  .timeline { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 6px 18px; box-shadow: 0 2px 10px rgba(30,28,22,.05); }
+  .timeline li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .timeline li:last-child { border-bottom: none; }
+  .time { flex-shrink: 0; width: 54px; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--accent); }
+  .time.muted { color: var(--muted); font-weight: 400; }
+  .tl-title { font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .note { color: var(--muted); font-size: 13px; white-space: pre-wrap; margin: 4px 0 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chips span { background: var(--accent-soft); color: var(--accent-dark); border-radius: 999px;
+    padding: 3px 11px; font-size: 12px; font-weight: 500; }
+  .map { margin: 8px 0; }
+  .map svg { display: block; border-radius: 10px; }
+  .link { margin: 8px 0 0; font-size: 13px; }
+  a { color: var(--accent); word-break: break-all; }
+  .empty { color: var(--muted); font-size: 13px; margin: 4px 0; }
+  .footer { margin-top: 38px; text-align: center; color: var(--muted); font-size: 12px; }
+  @media print {
+    body { background: #fff; }
+    .page { max-width: none; padding: 0; }
+    .hero, .card, .timeline { box-shadow: none; }
+    .card, .timeline, .map { break-inside: avoid; }
+    @page { margin: 14mm; }
+  }
 </style>
 </head>
 <body>
-  <h1>${plan.icon} ${esc(plan.title)}</h1>
-  <p class="muted">${esc(formatRange(plan.startDate, plan.endDate))}</p>
-  ${plan.tags.length ? `<p>${plan.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</p>` : ''}
-  ${plan.description ? `<p>${esc(plan.description)}</p>` : ''}
-  <h2>日程</h2>
-  ${scheduleHtml}
-  ${listHtml}
-  <h2>轨迹</h2>
-  ${trackHtml}
+<div class="page">
+  <header class="hero">
+    <div class="icon">${esc(plan.icon)}</div>
+    <div>
+      <h1>${esc(plan.title)}</h1>
+      <div class="range">${esc(dateRange)}</div>
+      ${
+        plan.tags.length
+          ? `<div class="tags">${plan.tags
+              .map((t) => `<span class="tag">${esc(t)}</span>`)
+              .join('')}</div>`
+          : ''
+      }
+    </div>
+  </header>
+  ${plan.description ? `<p class="desc">${esc(plan.description)}</p>` : ''}
+  <section class="block"><h2>日程</h2>${scheduleHtml}</section>
+  <section class="block"><h2>清单</h2>${
+    listHtml || '<p class="empty">暂无清单</p>'
+  }</section>
+  <section class="block"><h2>轨迹</h2>${trackHtml}</section>
+  <footer class="footer">由「拾集」生成 · ${generated}</footer>
+</div>
 </body>
 </html>`;
 }
