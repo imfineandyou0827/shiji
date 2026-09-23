@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import { currentDatabase, useStore } from '../../store/useStore';
 import { parseDatabase, serializeDatabase } from '../../storage/db';
+
+declare const __BUILD_TIME__: string;
 import { Button } from '../../components/Button';
 import { PageHeader } from '../../components/PageHeader';
 import { InstallApp } from './InstallApp';
@@ -130,6 +132,10 @@ export function SettingsPage() {
           清空全部数据
         </Button>
       </section>
+
+      <p className={styles.buildInfo}>
+        版本：构建于 {new Date(__BUILD_TIME__).toLocaleString('zh-CN')}
+      </p>
     </div>
   );
 }

@@ -51,3 +51,10 @@
   color: var(--text-muted);
   line-height: 1.6;
 }
+
+.buildInfo {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}

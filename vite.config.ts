@@ -8,6 +8,9 @@ const base = process.env.VITE_BASE || '/'
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   preview: {
     allowedHosts: ['.trycloudflare.com'],
   },
