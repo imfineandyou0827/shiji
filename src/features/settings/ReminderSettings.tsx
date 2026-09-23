@@ -24,6 +24,15 @@ export function ReminderSettings() {
   };
 
   const test = async () => {
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission !== 'granted') {
+      const result = await Notification.requestPermission();
+      setPermission(result);
+      if (result !== 'granted') {
+        window.alert('需要允许通知才能测试。');
+        return;
+      }
+    }
     const ok = await showLocalNotification('拾集测试提醒', {
       body: '如果你看到这条通知，说明提醒能用。',
     });
@@ -38,27 +47,28 @@ export function ReminderSettings() {
         <p className={styles.hint}>当前浏览器不支持通知。</p>
       )}
       {permission === 'granted' && (
-        <>
-          <p className={styles.ok}>提醒已开启。日程到点时会弹出通知。</p>
-          <Button size="sm" onClick={test}>
-            测试提醒
-          </Button>
-        </>
+        <p className={styles.ok}>提醒已开启。日程到点时会弹出通知。</p>
       )}
       {permission === 'denied' && (
         <p className={styles.warn}>
-          通知被禁用。请在浏览器地址栏的站点设置里允许通知后重试。
+          通知被禁用。请到浏览器/系统设置里允许本网站的通知后重试。
         </p>
       )}
       {permission === 'default' && (
-        <>
-          <p className={styles.hint}>
-            开启后，日程到点会弹出系统通知（例如「番剧更新」「出发集合」）。
-          </p>
-          <Button variant="primary" onClick={request}>
-            开启提醒
-          </Button>
-        </>
+        <p className={styles.hint}>
+          点「开启提醒」允许通知，再用「测试提醒」验证。
+        </p>
+      )}
+
+      {permission !== 'unsupported' && (
+        <div className={styles.actions}>
+          {permission !== 'granted' && (
+            <Button variant="primary" onClick={request}>
+              开启提醒
+            </Button>
+          )}
+          <Button onClick={test}>测试提醒</Button>
+        </div>
       )}
 
       <p className={styles.hint}>
