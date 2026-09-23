@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 构建产物 / 分发压缩包
+shiji-dist.zip
