@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { Suspense, lazy, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import type { AppList, AppObject, Difficulty, Schedule, Track } from '../../types';
 import { useStore } from '../../store/useStore';
@@ -14,8 +14,11 @@ import { countPoints } from '../../utils/gpx';
 import { PlanForm } from './PlanForm';
 import { TrackForm } from './TrackForm';
 import { AttachPicker } from './AttachPicker';
-import { ExportDialog } from './ExportDialog';
 import styles from './PlanDetailPage.module.css';
+
+const ExportDialog = lazy(() =>
+  import('./ExportDialog').then((m) => ({ default: m.ExportDialog })),
+);
 
 const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   '': '',
@@ -407,7 +410,11 @@ export function PlanDetailPage() {
         onSubmit={(input) => updatePlan(plan.id, input)}
       />
 
-      <ExportDialog open={exportOpen} plan={plan} onClose={() => setExportOpen(false)} />
+      {exportOpen && (
+        <Suspense fallback={null}>
+          <ExportDialog open plan={plan} onClose={() => setExportOpen(false)} />
+        </Suspense>
+      )}
 
       <ScheduleForm
         open={scheduleFormOpen}

@@ -1,13 +1,31 @@
+import { lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './app/Layout';
-import { ObjectsPage } from './features/objects/ObjectsPage';
-import { ObjectDetailPage } from './features/objects/ObjectDetailPage';
-import { ListsPage } from './features/lists/ListsPage';
-import { ListDetailPage } from './features/lists/ListDetailPage';
-import { SchedulesPage } from './features/schedules/SchedulesPage';
-import { PlansPage } from './features/plans/PlansPage';
-import { PlanDetailPage } from './features/plans/PlanDetailPage';
-import { SettingsPage } from './features/settings/SettingsPage';
+
+const ObjectsPage = lazy(() =>
+  import('./features/objects/ObjectsPage').then((m) => ({ default: m.ObjectsPage })),
+);
+const ObjectDetailPage = lazy(() =>
+  import('./features/objects/ObjectDetailPage').then((m) => ({ default: m.ObjectDetailPage })),
+);
+const ListsPage = lazy(() =>
+  import('./features/lists/ListsPage').then((m) => ({ default: m.ListsPage })),
+);
+const ListDetailPage = lazy(() =>
+  import('./features/lists/ListDetailPage').then((m) => ({ default: m.ListDetailPage })),
+);
+const SchedulesPage = lazy(() =>
+  import('./features/schedules/SchedulesPage').then((m) => ({ default: m.SchedulesPage })),
+);
+const PlansPage = lazy(() =>
+  import('./features/plans/PlansPage').then((m) => ({ default: m.PlansPage })),
+);
+const PlanDetailPage = lazy(() =>
+  import('./features/plans/PlanDetailPage').then((m) => ({ default: m.PlanDetailPage })),
+);
+const SettingsPage = lazy(() =>
+  import('./features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
+);
 
 function App() {
   return (

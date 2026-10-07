@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { ReminderManager } from '../features/reminders/ReminderManager';
 import { BackupManager } from '../features/backup/BackupManager';
+import { RouteFallback } from './RouteFallback';
 import styles from './Layout.module.css';
 
 const NAV = [
@@ -38,7 +40,9 @@ export function Layout() {
       </header>
 
       <main className={styles.main}>
-        <Outlet />
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <nav className={styles.bottomNav}>
