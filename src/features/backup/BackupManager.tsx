@@ -12,7 +12,8 @@ function hasData(): boolean {
     db.objects.length > 0 ||
     db.lists.length > 0 ||
     db.schedules.length > 0 ||
-    db.plans.length > 0
+    db.plans.length > 0 ||
+    (db.benefits?.length ?? 0) > 0
   );
 }
 

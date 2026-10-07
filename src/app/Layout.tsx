@@ -10,6 +10,7 @@ const NAV = [
   { to: '/lists', label: '清单', icon: '📋', end: false },
   { to: '/schedules', label: '日程', icon: '🗓️', end: false },
   { to: '/plans', label: '计划', icon: '🥾', end: false },
+  { to: '/benefits', label: '权益', icon: '🎫', end: false },
   { to: '/settings', label: '设置', icon: '⚙️', end: false },
 ];
 

@@ -23,6 +23,9 @@ const PlansPage = lazy(() =>
 const PlanDetailPage = lazy(() =>
   import('./features/plans/PlanDetailPage').then((m) => ({ default: m.PlanDetailPage })),
 );
+const BenefitsPage = lazy(() =>
+  import('./features/benefits/BenefitsPage').then((m) => ({ default: m.BenefitsPage })),
+);
 const SettingsPage = lazy(() =>
   import('./features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })),
 );
@@ -39,6 +42,7 @@ function App() {
           <Route path="schedules" element={<SchedulesPage />} />
           <Route path="plans" element={<PlansPage />} />
           <Route path="plans/:id" element={<PlanDetailPage />} />
+          <Route path="benefits" element={<BenefitsPage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

@@ -1,5 +1,15 @@
 import { create } from 'zustand';
-import type { AppList, AppObject, Database, ListItem, Plan, Schedule, Tombstone, Track } from '../types';
+import type {
+  AppList,
+  AppObject,
+  Benefit,
+  Database,
+  ListItem,
+  Plan,
+  Schedule,
+  Tombstone,
+  Track,
+} from '../types';
 import { emptyDatabase, loadDatabase, saveDatabase, SCHEMA_VERSION } from '../storage/db';
 import { createId, now } from '../utils/id';
 
@@ -12,12 +22,14 @@ export type PlanInput = Pick<
   'title' | 'icon' | 'description' | 'tags' | 'startDate' | 'endDate'
 >;
 export type TrackInput = Omit<Track, 'id'>;
+export type BenefitInput = Omit<Benefit, 'id' | 'createdAt' | 'updatedAt'>;
 
 interface Store {
   objects: AppObject[];
   lists: AppList[];
   schedules: Schedule[];
   plans: Plan[];
+  benefits: Benefit[];
   categories: string[];
   tombstones: Tombstone[];
   addObject: (input: ObjectInput) => AppObject;
@@ -54,6 +66,9 @@ interface Store {
   addTrack: (planId: string, input: TrackInput) => Track;
   updateTrack: (planId: string, trackId: string, patch: Partial<TrackInput>) => void;
   removeTrack: (planId: string, trackId: string) => void;
+  addBenefit: (input: BenefitInput) => Benefit;
+  updateBenefit: (id: string, patch: Partial<BenefitInput>) => void;
+  removeBenefit: (id: string) => void;
   importDatabase: (db: Database) => void;
   resetDatabase: () => void;
 }
@@ -79,6 +94,7 @@ export const useStore = create<Store>()((set, get) => ({
   lists: initial.lists,
   schedules: initial.schedules,
   plans: initial.plans,
+  benefits: initial.benefits,
   categories: initial.categories,
   tombstones: initial.tombstones,
 
@@ -454,12 +470,30 @@ export const useStore = create<Store>()((set, get) => ({
       ),
     })),
 
+  addBenefit: (input) => {
+    const benefit: Benefit = { ...input, id: createId(), createdAt: stamp(), updatedAt: stamp() };
+    set((s) => ({ benefits: [benefit, ...s.benefits] }));
+    return benefit;
+  },
+
+  updateBenefit: (id, patch) =>
+    set((s) => ({
+      benefits: s.benefits.map((b) => (b.id === id ? { ...b, ...patch, updatedAt: stamp() } : b)),
+    })),
+
+  removeBenefit: (id) =>
+    set((s) => ({
+      benefits: s.benefits.filter((b) => b.id !== id),
+      tombstones: [...s.tombstones, tombstone(id)],
+    })),
+
   importDatabase: (db) =>
     set(() => ({
       objects: db.objects,
       lists: db.lists,
       schedules: db.schedules,
       plans: db.plans,
+      benefits: db.benefits,
       categories: db.categories,
       tombstones: db.tombstones,
     })),
@@ -471,6 +505,7 @@ export const useStore = create<Store>()((set, get) => ({
       lists: empty.lists,
       schedules: empty.schedules,
       plans: empty.plans,
+      benefits: empty.benefits,
       categories: empty.categories,
       tombstones: empty.tombstones,
     }));
@@ -485,6 +520,7 @@ export function currentDatabase(): Database {
     lists: s.lists,
     schedules: s.schedules,
     plans: s.plans,
+    benefits: s.benefits,
     categories: s.categories,
     tombstones: s.tombstones,
   };
@@ -497,6 +533,7 @@ useStore.subscribe((s) => {
     lists: s.lists,
     schedules: s.schedules,
     plans: s.plans,
+    benefits: s.benefits,
     categories: s.categories,
     tombstones: s.tombstones,
   });

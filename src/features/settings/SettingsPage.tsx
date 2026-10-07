@@ -16,6 +16,7 @@ export function SettingsPage() {
   const lists = useStore((s) => s.lists);
   const schedules = useStore((s) => s.schedules);
   const plans = useStore((s) => s.plans);
+  const benefits = useStore((s) => s.benefits);
   const importDatabase = useStore((s) => s.importDatabase);
   const resetDatabase = useStore((s) => s.resetDatabase);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -42,7 +43,7 @@ export function SettingsPage() {
       const db = result.database;
       if (
         window.confirm(
-          `导入将覆盖当前全部数据：${db.objects.length} 个对象、${db.lists.length} 份清单、${db.schedules.length} 条日程。继续？`,
+          `导入将覆盖当前全部数据：${db.objects.length} 个对象、${db.lists.length} 份清单、${db.schedules.length} 条日程、${db.benefits.length} 项权益。继续？`,
         )
       ) {
         importDatabase(db);
@@ -53,7 +54,7 @@ export function SettingsPage() {
   };
 
   const handleReset = () => {
-    if (window.confirm('确定清空所有对象、清单和日程？此操作不可撤销。')) {
+    if (window.confirm('确定清空所有数据（对象、清单、日程、计划、权益）？此操作不可撤销。')) {
       resetDatabase();
     }
   };
@@ -80,6 +81,10 @@ export function SettingsPage() {
           <div className={styles.stat}>
             <span className={styles.statValue}>{plans.length}</span>
             <span className={styles.statLabel}>计划</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={styles.statValue}>{benefits.length}</span>
+            <span className={styles.statLabel}>权益</span>
           </div>
         </div>
       </section>

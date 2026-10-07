@@ -58,6 +58,7 @@ export interface SyncCounts {
   lists: number;
   schedules: number;
   plans: number;
+  benefits: number;
 }
 
 export interface SyncOutcome {
@@ -74,6 +75,7 @@ function counts(db: Database): SyncCounts {
     lists: db.lists.length,
     schedules: db.schedules.length,
     plans: db.plans.length,
+    benefits: (db.benefits ?? []).length,
   };
 }
 

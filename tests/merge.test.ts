@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AppList, AppObject, Database, Schedule } from '../src/types';
+import type { AppList, AppObject, Benefit, Database, Schedule } from '../src/types';
 import { SCHEMA_VERSION } from '../src/storage/db';
 import { mergeDatabases } from '../src/utils/merge';
 
@@ -49,6 +49,26 @@ function schedule(id: string, updatedAt: string, title = id): Schedule {
   };
 }
 
+function benefit(id: string, updatedAt: string, title = id): Benefit {
+  return {
+    id,
+    title,
+    category: 'card',
+    provider: '',
+    icon: '💳',
+    iconType: 'emoji',
+    identifier: '',
+    link: '',
+    expiresAt: null,
+    tags: [],
+    perks: [],
+    notes: '',
+    active: true,
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt,
+  };
+}
+
 function db(partial: Partial<Database> = {}): Database {
   return {
     version: SCHEMA_VERSION,
@@ -56,6 +76,7 @@ function db(partial: Partial<Database> = {}): Database {
     lists: [],
     schedules: [],
     plans: [],
+    benefits: [],
     categories: [],
     tombstones: [],
     ...partial,
@@ -139,5 +160,22 @@ describe('mergeDatabases', () => {
       })(),
     );
     expect(merged.categories).toEqual(['a', 'b', 'c']);
+  });
+
+  it('merges benefits by id with the newer copy winning', () => {
+    const merged = mergeDatabases(
+      db({ benefits: [benefit('b1', '2024-01-01T00:00:00.000Z', '旧')] }),
+      db({ benefits: [benefit('b1', '2024-03-01T00:00:00.000Z', '新')] }),
+    );
+    expect(merged.benefits).toHaveLength(1);
+    expect(merged.benefits[0].title).toBe('新');
+  });
+
+  it('removes a benefit covered by a tombstone', () => {
+    const merged = mergeDatabases(
+      db({ benefits: [benefit('b1', '2024-01-01T00:00:00.000Z')] }),
+      db({ tombstones: [{ id: 'b1', deletedAt: '2024-02-01T00:00:00.000Z' }] }),
+    );
+    expect(merged.benefits).toHaveLength(0);
   });
 });

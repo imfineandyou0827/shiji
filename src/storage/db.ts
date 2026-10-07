@@ -1,6 +1,8 @@
 import type {
   AppList,
   AppObject,
+  Benefit,
+  BenefitPerk,
   Database,
   ListItem,
   Plan,
@@ -13,7 +15,7 @@ import type {
 import { createId, now } from '../utils/id';
 
 export const STORAGE_KEY = 'shiji:data';
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export function emptyDatabase(): Database {
   return {
@@ -22,6 +24,7 @@ export function emptyDatabase(): Database {
     lists: [],
     schedules: [],
     plans: [],
+    benefits: [],
     categories: [],
     tombstones: [],
   };
@@ -181,6 +184,47 @@ function normalizeTrack(raw: unknown): Track | null {
   };
 }
 
+function normalizePerk(raw: unknown): BenefitPerk | null {
+  if (!isRecord(raw)) return null;
+  return {
+    id: str(raw.id) || createId(),
+    title: str(raw.title),
+    note: str(raw.note),
+    expiresAt: nullableStr(raw.expiresAt),
+    used: bool(raw.used),
+  };
+}
+
+function normalizeBenefit(raw: unknown): Benefit | null {
+  if (!isRecord(raw)) return null;
+  const category = raw.category;
+  return {
+    id: str(raw.id) || createId(),
+    title: str(raw.title),
+    category:
+      category === 'card' ||
+      category === 'insurance' ||
+      category === 'membership' ||
+      category === 'other'
+        ? category
+        : 'other',
+    provider: str(raw.provider),
+    icon: str(raw.icon) || '💳',
+    iconType: raw.iconType === 'image' ? 'image' : 'emoji',
+    identifier: str(raw.identifier),
+    link: str(raw.link),
+    expiresAt: nullableStr(raw.expiresAt),
+    tags: strArray(raw.tags),
+    perks: asArray(raw.perks)
+      .map(normalizePerk)
+      .filter((p): p is BenefitPerk => p !== null),
+    notes: str(raw.notes),
+    active: bool(raw.active, true),
+    createdAt: str(raw.createdAt) || now(),
+    updatedAt: str(raw.updatedAt) || now(),
+  };
+}
+
 function normalizeTombstones(raw: unknown): Tombstone[] {
   return asArray(raw)
     .filter(isRecord)
@@ -257,6 +301,10 @@ export function migrate(raw: unknown): Database {
       listIds: p.listIds.filter((id) => listIdSet.has(id)),
     }));
 
+  const benefits = asArray(raw.benefits)
+    .map(normalizeBenefit)
+    .filter((b): b is Benefit => b !== null);
+
   const categorySet = new Set(strArray(raw.categories));
   normalizedObjects.forEach((o) => {
     if (o.category) categorySet.add(o.category);
@@ -268,6 +316,7 @@ export function migrate(raw: unknown): Database {
     lists,
     schedules,
     plans,
+    benefits,
     categories: [...categorySet].sort((a, b) => a.localeCompare(b)),
     tombstones: normalizeTombstones(raw.tombstones),
   };
@@ -311,8 +360,14 @@ export function parseDatabase(text: string): ImportResult {
   if (!isRecord(raw)) {
     return { ok: false, error: '数据格式不正确' };
   }
-  if (!('objects' in raw) && !('lists' in raw) && !('schedules' in raw) && !('plans' in raw)) {
-    return { ok: false, error: '缺少对象、清单、日程或计划数据' };
+  if (
+    !('objects' in raw) &&
+    !('lists' in raw) &&
+    !('schedules' in raw) &&
+    !('plans' in raw) &&
+    !('benefits' in raw)
+  ) {
+    return { ok: false, error: '缺少对象、清单、日程、计划或权益数据' };
   }
   return { ok: true, database: migrate(raw) };
 }

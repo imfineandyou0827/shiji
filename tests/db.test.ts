@@ -112,6 +112,21 @@ describe('migrate', () => {
     });
     expect(result.lists[0].items.map((i) => i.quantity)).toEqual([1, 3]);
   });
+
+  it('normalizes benefits and their perks', () => {
+    const result = migrate({
+      benefits: [
+        { id: 'b1', title: '招行卡', perks: [{ title: '贵宾厅', used: true }, null] },
+        { title: '无类型' },
+      ],
+    });
+    expect(result.benefits).toHaveLength(2);
+    const b1 = result.benefits.find((b) => b.id === 'b1');
+    expect(b1?.category).toBe('other');
+    expect(b1?.icon).toBe('💳');
+    expect(b1?.perks).toHaveLength(1);
+    expect(b1?.perks[0].used).toBe(true);
+  });
 });
 
 describe('parseDatabase', () => {
@@ -131,6 +146,12 @@ describe('parseDatabase', () => {
     );
     expect(result.ok).toBe(true);
     expect(result.database?.objects).toHaveLength(1);
+  });
+
+  it('accepts a database that only has benefits', () => {
+    const result = parseDatabase(JSON.stringify({ benefits: [{ id: 'b1', title: '机场贵宾厅' }] }));
+    expect(result.ok).toBe(true);
+    expect(result.database?.benefits).toHaveLength(1);
   });
 
   it('round-trips through serializeDatabase', () => {

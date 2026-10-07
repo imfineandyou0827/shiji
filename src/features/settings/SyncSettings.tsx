@@ -57,7 +57,7 @@ export function SyncSettings() {
       setSettings(next);
       saveSyncSettings(next);
       const r = outcome.result;
-      const summary = `对象 ${r.objects} · 清单 ${r.lists} · 日程 ${r.schedules} · 计划 ${r.plans}`;
+      const summary = `对象 ${r.objects} · 清单 ${r.lists} · 日程 ${r.schedules} · 计划 ${r.plans} · 权益 ${r.benefits}`;
       const label =
         outcome.action === 'created'
           ? `已创建新的私有 Gist（ID 见下方）。请在其它设备填入同一个 Gist ID 和相同口令，再点同步。`

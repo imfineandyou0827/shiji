@@ -97,6 +97,31 @@ export interface Plan extends EntityBase {
   tracks: Track[];
 }
 
+export type BenefitCategory = 'card' | 'insurance' | 'membership' | 'other';
+
+export interface BenefitPerk {
+  id: string;
+  title: string;
+  note: string;
+  expiresAt: string | null;
+  used: boolean;
+}
+
+export interface Benefit extends EntityBase {
+  title: string;
+  category: BenefitCategory;
+  provider: string;
+  icon: string;
+  iconType: IconType;
+  identifier: string;
+  link: string;
+  expiresAt: string | null;
+  tags: string[];
+  perks: BenefitPerk[];
+  notes: string;
+  active: boolean;
+}
+
 export interface Tombstone {
   id: string;
   deletedAt: string;
@@ -108,6 +133,7 @@ export interface Database {
   lists: AppList[];
   schedules: Schedule[];
   plans: Plan[];
+  benefits: Benefit[];
   categories: string[];
   tombstones: Tombstone[];
 }
