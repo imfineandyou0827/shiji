@@ -132,7 +132,6 @@ function ObjectFormBody({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="例如：登山杖"
-          autoFocus
         />
       </Field>
 
@@ -247,11 +246,13 @@ function ObjectFormBody({
             value={field.key}
             onChange={(e) => updateField(index, { key: e.target.value })}
             placeholder="字段名"
+            aria-label="字段名"
           />
           <TextInput
             value={field.value}
             onChange={(e) => updateField(index, { value: e.target.value })}
             placeholder="值"
+            aria-label="字段值"
           />
           <Button
             variant="ghost"

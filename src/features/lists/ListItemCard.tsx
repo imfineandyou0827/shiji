@@ -55,6 +55,7 @@ export function ListItemCard({ listId, item, object, sections, index, total }: L
           className={styles.note}
           value={item.note}
           placeholder="清单备注…"
+          aria-label={`${name}的备注`}
           onChange={(e) => updateListItem(listId, item.id, { note: e.target.value })}
         />
         {sections.length > 0 && (
@@ -78,11 +79,19 @@ export function ListItemCard({ listId, item, object, sections, index, total }: L
 
       <div className={styles.side}>
         <div className={styles.stepper}>
-          <button onClick={() => updateListItem(listId, item.id, { quantity: Math.max(1, item.quantity - 1) })}>
+          <button
+            type="button"
+            aria-label="减少数量"
+            onClick={() => updateListItem(listId, item.id, { quantity: Math.max(1, item.quantity - 1) })}
+          >
             −
           </button>
           <span>{item.quantity}</span>
-          <button onClick={() => updateListItem(listId, item.id, { quantity: item.quantity + 1 })}>
+          <button
+            type="button"
+            aria-label="增加数量"
+            onClick={() => updateListItem(listId, item.id, { quantity: item.quantity + 1 })}
+          >
             +
           </button>
         </div>

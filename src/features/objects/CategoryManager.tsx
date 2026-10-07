@@ -59,6 +59,7 @@ function CategoryManagerBody({ onClose }: Omit<CategoryManagerProps, 'open'>) {
             if (e.key === 'Enter') add();
           }}
           placeholder="新增分类名称"
+          aria-label="新增分类名称"
         />
         <Button variant="primary" onClick={add} disabled={!newName.trim()}>
           添加

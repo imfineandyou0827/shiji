@@ -128,7 +128,6 @@ function TrackFormBody({ initial, onClose, onSubmit }: TrackFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="例如：武功山穿越线"
-          autoFocus
         />
       </Field>
 

@@ -58,7 +58,7 @@ function AddObjectPickerBody({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="搜索对象…"
-        autoFocus
+        aria-label="搜索对象"
       />
 
       {categories.length > 0 && (

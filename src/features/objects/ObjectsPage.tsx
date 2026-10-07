@@ -78,6 +78,7 @@ export function ObjectsPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="搜索名称、分类或标签…"
+          aria-label="搜索名称、分类或标签"
         />
       </div>
 

@@ -112,6 +112,7 @@ function SectionFormBody({ excludeIds, onClose, onAttach }: Omit<SectionFormProp
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="搜索对象…"
+                  aria-label="搜索对象"
                   className={styles.search}
                 />
               )}
@@ -145,6 +146,7 @@ function SectionFormBody({ excludeIds, onClose, onAttach }: Omit<SectionFormProp
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="搜索分区…"
+              aria-label="搜索分区"
               className={styles.search}
             />
           )}

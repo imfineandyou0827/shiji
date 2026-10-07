@@ -80,7 +80,6 @@ function PlanFormBody({ initial, onClose, onSubmit }: PlanFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="例如：周末武功山徒步"
-          autoFocus
         />
       </Field>
 

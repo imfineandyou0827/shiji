@@ -13,12 +13,14 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function Button({
   variant = 'secondary',
   size = 'md',
+  type = 'button',
   className,
   children,
   ...rest
 }: ButtonProps) {
   return (
     <button
+      type={type}
       className={[styles.button, styles[variant], styles[size], className].filter(Boolean).join(' ')}
       {...rest}
     >
