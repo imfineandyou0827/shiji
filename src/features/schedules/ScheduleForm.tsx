@@ -56,7 +56,6 @@ function ScheduleFormBody({ initial, onClose, onSubmit }: ScheduleFormProps) {
       time,
       notes: notes.trim(),
       active: initial?.active ?? true,
-      planId: initial?.planId ?? null,
     });
     onClose();
   };
@@ -82,7 +81,6 @@ function ScheduleFormBody({ initial, onClose, onSubmit }: ScheduleFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="例如：某番更新"
-          autoFocus
         />
       </Field>
 

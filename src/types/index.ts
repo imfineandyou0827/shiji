@@ -41,7 +41,6 @@ export interface AppList extends EntityBase {
   tags: string[];
   sectionIds: string[];
   items: ListItem[];
-  planId: string | null;
 }
 
 export type RecurrenceType = 'weekly' | 'monthly' | 'once';
@@ -61,7 +60,6 @@ export interface Schedule extends EntityBase {
   time: string;
   notes: string;
   active: boolean;
-  planId: string | null;
 }
 
 export interface TrackPoint {

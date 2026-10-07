@@ -103,7 +103,6 @@ function normalizeList(raw: unknown): AppList | null {
     items: asArray(raw.items)
       .map(normalizeListItem)
       .filter((i): i is ListItem => i !== null),
-    planId: nullableStr(raw.planId),
     createdAt: str(raw.createdAt) || now(),
     updatedAt: str(raw.updatedAt) || now(),
   };
@@ -133,7 +132,6 @@ function normalizeSchedule(raw: unknown): Schedule | null {
     time: str(raw.time),
     notes: str(raw.notes),
     active: bool(raw.active, true),
-    planId: nullableStr(raw.planId),
     createdAt: str(raw.createdAt) || now(),
     updatedAt: str(raw.updatedAt) || now(),
   };
@@ -259,9 +257,6 @@ export function migrate(raw: unknown): Database {
       listIds: p.listIds.filter((id) => listIdSet.has(id)),
     }));
 
-  const fixedLists = lists.map((l) => ({ ...l, planId: null }));
-  const fixedSchedules = schedules.map((s) => ({ ...s, planId: null }));
-
   const categorySet = new Set(strArray(raw.categories));
   normalizedObjects.forEach((o) => {
     if (o.category) categorySet.add(o.category);
@@ -270,8 +265,8 @@ export function migrate(raw: unknown): Database {
   return {
     version: SCHEMA_VERSION,
     objects: normalizedObjects,
-    lists: fixedLists,
-    schedules: fixedSchedules,
+    lists,
+    schedules,
     plans,
     categories: [...categorySet].sort((a, b) => a.localeCompare(b)),
     tombstones: normalizeTombstones(raw.tombstones),

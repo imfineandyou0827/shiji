@@ -393,7 +393,7 @@ export const useStore = create<Store>()((set, get) => ({
     })),
 
   createPlanSchedule: (planId, input) => {
-    const schedule = get().addSchedule({ ...input, planId: null });
+    const schedule = get().addSchedule(input);
     get().attachPlanSchedule(planId, schedule.id);
     return schedule;
   },
@@ -417,7 +417,7 @@ export const useStore = create<Store>()((set, get) => ({
     })),
 
   createPlanList: (planId, input) => {
-    const list = get().addList({ ...input, planId: null });
+    const list = get().addList(input);
     get().attachPlanList(planId, list.id);
     return list;
   },

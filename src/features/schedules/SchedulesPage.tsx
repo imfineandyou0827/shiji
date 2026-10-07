@@ -35,7 +35,13 @@ export function SchedulesPage() {
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
   const objectMap = useMemo(() => new Map(objects.map((o) => [o.id, o])), [objects]);
   const listMap = useMemo(() => new Map(lists.map((l) => [l.id, l])), [lists]);
-  const planMap = useMemo(() => new Map(plans.map((p) => [p.id, p])), [plans]);
+  const planBySchedule = useMemo(() => {
+    const map = new Map<string, (typeof plans)[number]>();
+    for (const plan of plans) {
+      for (const scheduleId of plan.scheduleIds) map.set(scheduleId, plan);
+    }
+    return map;
+  }, [plans]);
 
   const openNew = () => {
     setEditing(null);
@@ -126,7 +132,7 @@ export function SchedulesPage() {
           {schedules.map((s) => {
             const obj = s.objectId ? objectMap.get(s.objectId) : undefined;
             const linkedList = s.listId ? listMap.get(s.listId) : undefined;
-            const plan = s.planId ? planMap.get(s.planId) : undefined;
+            const plan = planBySchedule.get(s.id);
             return (
               <div key={s.id} className={[styles.row, s.active ? '' : styles.inactive].join(' ')}>
                 <label className={styles.toggle}>

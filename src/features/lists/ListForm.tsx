@@ -38,7 +38,6 @@ function ListFormBody({ initial, onClose, onSubmit }: ListFormProps) {
       tags: parseTags(tagsInput),
       sectionIds: initial?.sectionIds ?? [],
       items: initial?.items ?? [],
-      planId: initial?.planId ?? null,
     });
     onClose();
   };
@@ -79,7 +78,6 @@ function ListFormBody({ initial, onClose, onSubmit }: ListFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="例如：周末徒步装备"
-          autoFocus
         />
       </Field>
 
