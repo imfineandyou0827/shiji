@@ -28,6 +28,7 @@ export function HabitsPage() {
   const [filter, setFilter] = useState<Filter>('all');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const today = new Date();
   const todayIso = toISODate(today);
@@ -41,6 +42,14 @@ export function HabitsPage() {
     setEditing(habit);
     setFormOpen(true);
   };
+
+  const toggleExpanded = (id: string) =>
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const visible = habits
     .filter((habit) => {
@@ -106,6 +115,7 @@ export function HabitsPage() {
               .slice(0, 7)
               .map((day) => WEEKDAYS[parseISODate(day.date).getDay()]);
             const todayChecked = habit.checkins.includes(todayIso);
+            const expanded = expandedIds.has(habit.id);
             const range = `${days[0].date.slice(5).replace('-', '/')} – ${days[days.length - 1].date
               .slice(5)
               .replace('-', '/')}`;
@@ -135,6 +145,14 @@ export function HabitsPage() {
                     </div>
                   </div>
                   <div className={styles.actions}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      aria-expanded={expanded}
+                      onClick={() => toggleExpanded(habit.id)}
+                    >
+                      {expanded ? '收起' : '展开'}
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => openEdit(habit)}>
                       编辑
                     </Button>
@@ -161,36 +179,40 @@ export function HabitsPage() {
                   <span className={styles.progressFill} style={{ width: `${percent}%` }} />
                 </div>
 
-                <div className={styles.calendarHead}>
-                  <span>{range}</span>
-                  <span>最近 21 天 · 点日期补打卡</span>
-                </div>
-                <div className={styles.weekHead} aria-hidden="true">
-                  {weekdays.map((label, index) => (
-                    <span key={`${label}-${index}`}>{label}</span>
-                  ))}
-                </div>
-                <div className={styles.grid} role="group" aria-label="最近 21 天打卡记录">
-                  {days.map((day) => (
-                    <button
-                      key={day.date}
-                      type="button"
-                      className={[
-                        styles.day,
-                        day.checked ? styles.dayDone : '',
-                        day.today ? styles.dayToday : '',
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      aria-pressed={day.checked}
-                      aria-label={`${day.date}${day.checked ? ' 已打卡，点击取消' : ' 打卡'}`}
-                      title={`${day.date}${day.checked ? ' 已打卡，点击取消' : ' 点击打卡'}`}
-                      onClick={() => toggleCheckIn(habit.id, day.date)}
-                    >
-                      {day.day}
-                    </button>
-                  ))}
-                </div>
+                {expanded && (
+                  <>
+                    <div className={styles.calendarHead}>
+                      <span>{range}</span>
+                      <span>最近 21 天 · 点日期补打卡</span>
+                    </div>
+                    <div className={styles.weekHead} aria-hidden="true">
+                      {weekdays.map((label, index) => (
+                        <span key={`${label}-${index}`}>{label}</span>
+                      ))}
+                    </div>
+                    <div className={styles.grid} role="group" aria-label="最近 21 天打卡记录">
+                      {days.map((day) => (
+                        <button
+                          key={day.date}
+                          type="button"
+                          className={[
+                            styles.day,
+                            day.checked ? styles.dayDone : '',
+                            day.today ? styles.dayToday : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' ')}
+                          aria-pressed={day.checked}
+                          aria-label={`${day.date}${day.checked ? ' 已打卡，点击取消' : ' 打卡'}`}
+                          title={`${day.date}${day.checked ? ' 已打卡，点击取消' : ' 点击打卡'}`}
+                          onClick={() => toggleCheckIn(habit.id, day.date)}
+                        >
+                          {day.day}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
 
                 <div className={styles.foot}>
                   <Button
@@ -234,7 +256,7 @@ export function HabitsPage() {
                   </div>
                 )}
 
-                {habit.notes && <p className={styles.notes}>{habit.notes}</p>}
+                {expanded && habit.notes && <p className={styles.notes}>{habit.notes}</p>}
               </article>
             );
           })}
