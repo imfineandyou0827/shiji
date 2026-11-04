@@ -1,0 +1,1 @@
+import{t as e}from"./index-BwHhHdM2.js";var t={emoji:`_emoji_10hyo_1`,image:`_image_10hyo_7`},n=e();function r({value:e,type:r=`emoji`,size:i=24,alt:a=``}){return r===`image`&&e?(0,n.jsx)(`img`,{src:e,alt:a,className:t.image,style:{width:i,height:i}}):(0,n.jsx)(`span`,{className:t.emoji,style:{fontSize:i*.85,lineHeight:1},children:e||`📦`})}export{r as t};
