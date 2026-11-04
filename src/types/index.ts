@@ -122,11 +122,18 @@ export interface Benefit extends EntityBase {
   active: boolean;
 }
 
+export interface HabitResource {
+  id: string;
+  title: string;
+  url: string;
+}
+
 export interface Habit extends EntityBase {
   title: string;
   icon: string;
   notes: string;
   checkins: string[];
+  resources: HabitResource[];
 }
 
 export interface Tombstone {

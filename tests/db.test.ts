@@ -135,6 +135,11 @@ describe('migrate', () => {
           id: 'h1',
           title: '每天阅读',
           checkins: ['2024-01-02', 'bad', '2024-01-01', '2024-01-02', null],
+          resources: [
+            { id: 'r1', title: '跟练视频', url: 'https://example.com/video' },
+            { id: 'r2', title: '坏链接', url: 'javascript:alert(1)' },
+            { title: '没有链接' },
+          ],
         },
         { title: '早起' },
         null,
@@ -144,6 +149,10 @@ describe('migrate', () => {
     const h1 = result.habits.find((h) => h.id === 'h1');
     expect(h1?.icon).toBe('🌱');
     expect(h1?.checkins).toEqual(['2024-01-01', '2024-01-02']);
+    expect(h1?.resources).toEqual([
+      { id: 'r1', title: '跟练视频', url: 'https://example.com/video' },
+    ]);
+    expect(result.habits.find((h) => h.title === '早起')?.resources).toEqual([]);
   });
 });
 

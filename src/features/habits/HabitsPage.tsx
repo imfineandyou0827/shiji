@@ -5,6 +5,7 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { PageHeader } from '../../components/PageHeader';
 import { parseISODate, toISODate, WEEKDAYS } from '../../utils/date';
+import { isWebUrl } from '../../utils/format';
 import { currentStreak, HABIT_TARGET_DAYS, recentHabitDays } from './progress';
 import { HabitForm } from './HabitForm';
 import styles from './HabitsPage.module.css';
@@ -81,7 +82,7 @@ export function HabitsPage() {
         <EmptyState
           icon="🌱"
           title="还没有坚持目标"
-          description="写下想坚持的小事，比如每天阅读 20 分钟、喝够 8 杯水。每天打卡一次，累计 21 天就算养成。"
+          description="写下想坚持的小事，比如每天阅读 20 分钟、喝够 8 杯水。每天打卡一次，累计 21 天就算养成；锻炼、口才练习还能附上视频或素材链接。"
           action={
             <Button variant="primary" onClick={openNew}>
               + 新建目标
@@ -206,6 +207,32 @@ export function HabitsPage() {
                       : `还差 ${HABIT_TARGET_DAYS - total} 天`}
                   </span>
                 </div>
+
+                {habit.resources.length > 0 && (
+                  <div className={styles.resources}>
+                    <span className={styles.resourcesLabel}>练习素材</span>
+                    <div className={styles.resourceList}>
+                      {habit.resources.map((resource) =>
+                        isWebUrl(resource.url) ? (
+                          <a
+                            key={resource.id}
+                            className={styles.resourceLink}
+                            href={resource.url}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                          >
+                            <span aria-hidden="true">🔗</span>
+                            {resource.title || resource.url}
+                          </a>
+                        ) : (
+                          <span key={resource.id} className={styles.resourceMuted}>
+                            {resource.title || resource.url}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {habit.notes && <p className={styles.notes}>{habit.notes}</p>}
               </article>

@@ -5,6 +5,7 @@ import type {
   BenefitPerk,
   Database,
   Habit,
+  HabitResource,
   ListItem,
   Plan,
   Recurrence,
@@ -13,10 +14,11 @@ import type {
   Track,
   TrackPoint,
 } from '../types';
+import { isWebUrl } from '../utils/format';
 import { createId, now } from '../utils/id';
 
 export const STORAGE_KEY = 'shiji:data';
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export function emptyDatabase(): Database {
   return {
@@ -229,6 +231,17 @@ function normalizeBenefit(raw: unknown): Benefit | null {
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+function normalizeHabitResource(raw: unknown): HabitResource | null {
+  if (!isRecord(raw)) return null;
+  const url = str(raw.url).trim();
+  if (!isWebUrl(url)) return null;
+  return {
+    id: str(raw.id) || createId(),
+    title: str(raw.title).trim(),
+    url,
+  };
+}
+
 function normalizeHabit(raw: unknown): Habit | null {
   if (!isRecord(raw)) return null;
   const checkins = [
@@ -240,6 +253,9 @@ function normalizeHabit(raw: unknown): Habit | null {
     icon: str(raw.icon) || '🌱',
     notes: str(raw.notes),
     checkins,
+    resources: asArray(raw.resources)
+      .map(normalizeHabitResource)
+      .filter((r): r is HabitResource => r !== null),
     createdAt: str(raw.createdAt) || now(),
     updatedAt: str(raw.updatedAt) || now(),
   };

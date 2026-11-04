@@ -1,4 +1,5 @@
 import type { Database } from '../types';
+import { migrate } from '../storage/db';
 import { decryptJson, encryptJson } from './crypto';
 import { createGist, fetchGist, updateGist } from './gist';
 import { mergeDatabases } from './merge';
@@ -99,7 +100,7 @@ export async function runSync(config: SyncSettings, local: Database): Promise<Sy
     return { gistId, database: local, action: 'uploaded', remote: null, result: counts(local) };
   }
 
-  const remote = await decryptJson<Database>(config.passphrase, remoteRaw);
+  const remote = migrate(await decryptJson<Database>(config.passphrase, remoteRaw));
   const merged = mergeDatabases(local, remote);
   await updateGist(config.token, gistId, await encryptJson(config.passphrase, merged));
   return {
