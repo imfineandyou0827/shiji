@@ -4,6 +4,7 @@ import type {
   AppObject,
   Benefit,
   Database,
+  Habit,
   ListItem,
   Plan,
   Schedule,
@@ -23,6 +24,7 @@ export type PlanInput = Pick<
 >;
 export type TrackInput = Omit<Track, 'id'>;
 export type BenefitInput = Omit<Benefit, 'id' | 'createdAt' | 'updatedAt'>;
+export type HabitInput = Omit<Habit, 'id' | 'createdAt' | 'updatedAt'>;
 
 interface Store {
   objects: AppObject[];
@@ -30,6 +32,7 @@ interface Store {
   schedules: Schedule[];
   plans: Plan[];
   benefits: Benefit[];
+  habits: Habit[];
   categories: string[];
   tombstones: Tombstone[];
   addObject: (input: ObjectInput) => AppObject;
@@ -69,6 +72,10 @@ interface Store {
   addBenefit: (input: BenefitInput) => Benefit;
   updateBenefit: (id: string, patch: Partial<BenefitInput>) => void;
   removeBenefit: (id: string) => void;
+  addHabit: (input: HabitInput) => Habit;
+  updateHabit: (id: string, patch: Partial<HabitInput>) => void;
+  removeHabit: (id: string) => void;
+  toggleHabitCheckIn: (id: string, date: string) => void;
   importDatabase: (db: Database) => void;
   resetDatabase: () => void;
 }
@@ -95,6 +102,7 @@ export const useStore = create<Store>()((set, get) => ({
   schedules: initial.schedules,
   plans: initial.plans,
   benefits: initial.benefits,
+  habits: initial.habits,
   categories: initial.categories,
   tombstones: initial.tombstones,
 
@@ -487,6 +495,38 @@ export const useStore = create<Store>()((set, get) => ({
       tombstones: [...s.tombstones, tombstone(id)],
     })),
 
+  addHabit: (input) => {
+    const habit: Habit = { ...input, id: createId(), createdAt: stamp(), updatedAt: stamp() };
+    set((s) => ({ habits: [habit, ...s.habits] }));
+    return habit;
+  },
+
+  updateHabit: (id, patch) =>
+    set((s) => ({
+      habits: s.habits.map((h) => (h.id === id ? { ...h, ...patch, updatedAt: stamp() } : h)),
+    })),
+
+  removeHabit: (id) =>
+    set((s) => ({
+      habits: s.habits.filter((h) => h.id !== id),
+      tombstones: [...s.tombstones, tombstone(id)],
+    })),
+
+  toggleHabitCheckIn: (id, date) =>
+    set((s) => ({
+      habits: s.habits.map((h) =>
+        h.id === id
+          ? {
+              ...h,
+              checkins: h.checkins.includes(date)
+                ? h.checkins.filter((d) => d !== date)
+                : [...h.checkins, date].sort(),
+              updatedAt: stamp(),
+            }
+          : h,
+      ),
+    })),
+
   importDatabase: (db) =>
     set(() => ({
       objects: db.objects,
@@ -494,6 +534,7 @@ export const useStore = create<Store>()((set, get) => ({
       schedules: db.schedules,
       plans: db.plans,
       benefits: db.benefits,
+      habits: db.habits,
       categories: db.categories,
       tombstones: db.tombstones,
     })),
@@ -506,6 +547,7 @@ export const useStore = create<Store>()((set, get) => ({
       schedules: empty.schedules,
       plans: empty.plans,
       benefits: empty.benefits,
+      habits: empty.habits,
       categories: empty.categories,
       tombstones: empty.tombstones,
     }));
@@ -521,6 +563,7 @@ export function currentDatabase(): Database {
     schedules: s.schedules,
     plans: s.plans,
     benefits: s.benefits,
+    habits: s.habits,
     categories: s.categories,
     tombstones: s.tombstones,
   };
@@ -534,6 +577,7 @@ useStore.subscribe((s) => {
     schedules: s.schedules,
     plans: s.plans,
     benefits: s.benefits,
+    habits: s.habits,
     categories: s.categories,
     tombstones: s.tombstones,
   });

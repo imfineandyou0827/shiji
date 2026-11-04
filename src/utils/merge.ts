@@ -52,6 +52,7 @@ export function mergeDatabases(local: Database, remote: Database): Database {
     schedules: applyTombstones(mergeEntities(local.schedules, remote.schedules)),
     plans: applyTombstones(mergeEntities(local.plans, remote.plans)),
     benefits: applyTombstones(mergeEntities(local.benefits ?? [], remote.benefits ?? [])),
+    habits: applyTombstones(mergeEntities(local.habits ?? [], remote.habits ?? [])),
     categories,
     tombstones,
   };

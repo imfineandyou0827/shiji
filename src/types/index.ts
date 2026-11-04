@@ -122,6 +122,13 @@ export interface Benefit extends EntityBase {
   active: boolean;
 }
 
+export interface Habit extends EntityBase {
+  title: string;
+  icon: string;
+  notes: string;
+  checkins: string[];
+}
+
 export interface Tombstone {
   id: string;
   deletedAt: string;
@@ -134,6 +141,7 @@ export interface Database {
   schedules: Schedule[];
   plans: Plan[];
   benefits: Benefit[];
+  habits: Habit[];
   categories: string[];
   tombstones: Tombstone[];
 }

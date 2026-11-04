@@ -127,6 +127,24 @@ describe('migrate', () => {
     expect(b1?.perks).toHaveLength(1);
     expect(b1?.perks[0].used).toBe(true);
   });
+
+  it('normalizes habits and dedupes their check-in dates', () => {
+    const result = migrate({
+      habits: [
+        {
+          id: 'h1',
+          title: '每天阅读',
+          checkins: ['2024-01-02', 'bad', '2024-01-01', '2024-01-02', null],
+        },
+        { title: '早起' },
+        null,
+      ],
+    });
+    expect(result.habits).toHaveLength(2);
+    const h1 = result.habits.find((h) => h.id === 'h1');
+    expect(h1?.icon).toBe('🌱');
+    expect(h1?.checkins).toEqual(['2024-01-01', '2024-01-02']);
+  });
 });
 
 describe('parseDatabase', () => {
@@ -152,6 +170,12 @@ describe('parseDatabase', () => {
     const result = parseDatabase(JSON.stringify({ benefits: [{ id: 'b1', title: '机场贵宾厅' }] }));
     expect(result.ok).toBe(true);
     expect(result.database?.benefits).toHaveLength(1);
+  });
+
+  it('accepts a database that only has habits', () => {
+    const result = parseDatabase(JSON.stringify({ habits: [{ id: 'h1', title: '每天阅读' }] }));
+    expect(result.ok).toBe(true);
+    expect(result.database?.habits).toHaveLength(1);
   });
 
   it('round-trips through serializeDatabase', () => {

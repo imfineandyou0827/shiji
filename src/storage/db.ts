@@ -4,6 +4,7 @@ import type {
   Benefit,
   BenefitPerk,
   Database,
+  Habit,
   ListItem,
   Plan,
   Recurrence,
@@ -15,7 +16,7 @@ import type {
 import { createId, now } from '../utils/id';
 
 export const STORAGE_KEY = 'shiji:data';
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export function emptyDatabase(): Database {
   return {
@@ -25,6 +26,7 @@ export function emptyDatabase(): Database {
     schedules: [],
     plans: [],
     benefits: [],
+    habits: [],
     categories: [],
     tombstones: [],
   };
@@ -225,6 +227,24 @@ function normalizeBenefit(raw: unknown): Benefit | null {
   };
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function normalizeHabit(raw: unknown): Habit | null {
+  if (!isRecord(raw)) return null;
+  const checkins = [
+    ...new Set(strArray(raw.checkins).filter((date) => ISO_DATE.test(date))),
+  ].sort();
+  return {
+    id: str(raw.id) || createId(),
+    title: str(raw.title),
+    icon: str(raw.icon) || '🌱',
+    notes: str(raw.notes),
+    checkins,
+    createdAt: str(raw.createdAt) || now(),
+    updatedAt: str(raw.updatedAt) || now(),
+  };
+}
+
 function normalizeTombstones(raw: unknown): Tombstone[] {
   return asArray(raw)
     .filter(isRecord)
@@ -305,6 +325,10 @@ export function migrate(raw: unknown): Database {
     .map(normalizeBenefit)
     .filter((b): b is Benefit => b !== null);
 
+  const habits = asArray(raw.habits)
+    .map(normalizeHabit)
+    .filter((h): h is Habit => h !== null);
+
   const categorySet = new Set(strArray(raw.categories));
   normalizedObjects.forEach((o) => {
     if (o.category) categorySet.add(o.category);
@@ -317,6 +341,7 @@ export function migrate(raw: unknown): Database {
     schedules,
     plans,
     benefits,
+    habits,
     categories: [...categorySet].sort((a, b) => a.localeCompare(b)),
     tombstones: normalizeTombstones(raw.tombstones),
   };
@@ -365,9 +390,10 @@ export function parseDatabase(text: string): ImportResult {
     !('lists' in raw) &&
     !('schedules' in raw) &&
     !('plans' in raw) &&
-    !('benefits' in raw)
+    !('benefits' in raw) &&
+    !('habits' in raw)
   ) {
-    return { ok: false, error: '缺少对象、清单、日程、计划或权益数据' };
+    return { ok: false, error: '缺少对象、清单、日程、计划、权益或坚持数据' };
   }
   return { ok: true, database: migrate(raw) };
 }

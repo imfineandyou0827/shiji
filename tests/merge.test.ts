@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { AppList, AppObject, Benefit, Database, Schedule } from '../src/types';
+import type { AppList, AppObject, Benefit, Database, Habit, Schedule } from '../src/types';
 import { SCHEMA_VERSION } from '../src/storage/db';
 import { mergeDatabases } from '../src/utils/merge';
 
@@ -69,6 +69,18 @@ function benefit(id: string, updatedAt: string, title = id): Benefit {
   };
 }
 
+function habit(id: string, updatedAt: string, title = id): Habit {
+  return {
+    id,
+    title,
+    icon: '🌱',
+    notes: '',
+    checkins: [],
+    createdAt: '2024-01-01T00:00:00.000Z',
+    updatedAt,
+  };
+}
+
 function db(partial: Partial<Database> = {}): Database {
   return {
     version: SCHEMA_VERSION,
@@ -77,6 +89,7 @@ function db(partial: Partial<Database> = {}): Database {
     schedules: [],
     plans: [],
     benefits: [],
+    habits: [],
     categories: [],
     tombstones: [],
     ...partial,
@@ -177,5 +190,22 @@ describe('mergeDatabases', () => {
       db({ tombstones: [{ id: 'b1', deletedAt: '2024-02-01T00:00:00.000Z' }] }),
     );
     expect(merged.benefits).toHaveLength(0);
+  });
+
+  it('merges habits by id with the newer copy winning', () => {
+    const merged = mergeDatabases(
+      db({ habits: [habit('h1', '2024-01-01T00:00:00.000Z', '旧')] }),
+      db({ habits: [habit('h1', '2024-03-01T00:00:00.000Z', '新')] }),
+    );
+    expect(merged.habits).toHaveLength(1);
+    expect(merged.habits[0].title).toBe('新');
+  });
+
+  it('removes a habit covered by a tombstone', () => {
+    const merged = mergeDatabases(
+      db({ habits: [habit('h1', '2024-01-01T00:00:00.000Z')] }),
+      db({ tombstones: [{ id: 'h1', deletedAt: '2024-02-01T00:00:00.000Z' }] }),
+    );
+    expect(merged.habits).toHaveLength(0);
   });
 });
